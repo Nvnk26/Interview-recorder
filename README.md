@@ -1,5 +1,5 @@
 # Online Interview Recording System
-# 1. OVERVIEW
+# 1. OVERVIEWhttps://github.com/Nvnk26/Interview-recorder/blob/main/README.txt
 `web_phong_van` là hệ thống phỏng vấn trực tuyến chuyên nghiệp cho phép ứng viên trả lời câu hỏi thông qua video.  
 Hệ thống hỗ trợ:
 - Giao diện câu hỏi theo trình tự  
