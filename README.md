@@ -125,12 +125,63 @@ Upload includes:
 webphongvan/
 ├── interview-recorder/
 │   ├── api/                  
+│   │   ├── admin-api.php                
+│   │   ├── contact.php                  
+│   │   ├── session-finish.php           
+│   │   ├── session-start.php            
+│   │   ├── transcribe.php               
+│   │   ├── upload-one.php               
+│   │   └── verify-token.php             
+│   │
 │   ├── assets/               
 │   ├── Candidates_YYYY-MM-DD/
+│   │   ├── interviewee.tokens        
+│   │   └── tokens_backup.json        
+│   │
 │   ├── ffmpeg/               
+│   │   ├── bin/
+│   │   │   ├── ffmpeg              
+│   │   │   ├── ffplay              
+│   │   │   └── ffprobe             
+│   │   ├── doc/
+│   │   │   ├── bootstrap.min        
+│   │   │   ├── community/           
+│   │   │   ├── default/             
+│   │   │   ├── developer/           
+│   │   │   ├── fate/                
+│   │   │   ├── ffmpeg-all           
+│   │   │   ├── libavcodec/          
+│   │   │   ├── libavfilter/         
+│   │   │   ├── libavformat/         
+│   │   │   └── platform/            
+│   │   ├── presets/                     
+│   │   │   ├── libvpx-360p.ffpreset     
+│   │   │   ├── libvpx-720p.ffpreset     
+│   │   │   ├── libvpx-1080p.ffpreset    
+│   │   │   ├── libvpx-50.60.ffpreset      
+│   │   │   └── libvpx-1080-50-60.ffpreset 
+│   │
 │   ├── js/                   
+│   │   ├── recorder.js          
+│   │   └── recorder-v3.js      
 │   ├── uploads/              
 │   ├── whisper/              
+│   │   ├── models/            
+│   │   │   ├── ggml.dll                     
+│   │   │   ├── ggml-base.dll                  
+│   │   │   ├── ggml-cpu.dll                  
+│   │   │   ├── lsp/                      
+│   │   │   ├── quantize/                 
+│   │   │   ├── SDL2.dll                   
+│   │   │   ├── test-vad-full/            
+│   │   │   ├── test-vad/                 
+│   │   │   ├── vad-speech-segments/       
+│   │   │   ├── wchess/                   
+│   │   │   ├── whisper-bench/            
+│   │   │   ├── whisper-cli/              
+│   │   │   ├── whisper-command/           
+│   │   │   ├── whisper-stream/            
+│   │   │   └── whisper-talk-llama/        
 │   │
 │   ├── admin.html            
 │   ├── index.html            
@@ -144,10 +195,10 @@ webphongvan/
 │   ├── interviewee.xlsx      
 │   ├── questions.json        
 │   ├── tokens.json           
-│   ├── RUN.bat               
+│   └── RUN.bat               
 │
 ├── .gitattributes            
-└── README.md                 
+└── README.md            
 
 
 ```
