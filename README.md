@@ -1,86 +1,95 @@
-# Online Interview Recording System
-# 1. OVERVIEWhttps://github.com/Nvnk26/Interview-recorder/blob/main/README.txt
-`web_phong_van` là hệ thống phỏng vấn trực tuyến chuyên nghiệp cho phép ứng viên trả lời câu hỏi thông qua video.  
-Hệ thống hỗ trợ:
-- Giao diện câu hỏi theo trình tự  
-- Giới hạn thời gian trả lời  
-- Ghi hình bằng MediaRecorder  
-- Tự động upload video  
-- Token-based access (mỗi ứng viên một token duy nhất)  
-- Break-time giữa các câu  
-- Webhook/email khi hoàn thành
 
-Dự án thích hợp dùng cho nhà tuyển dụng, trung tâm đánh giá nhân sự, hoặc tổ chức phỏng vấn từ xa.
+# INTERVIEWING WEB
+# 1. Overview
+
+`web_phong_van` is a website used to provide interviewers with an online interview method and to store interview results.
+This project aims to make the interviewing process easier. Candidates can participate in multinational interviews without needing to travel for an in-person interview. For employers, the website helps them save time and manpower during the recruitment process; in addition, the website allows employers to store the interview results of candidates.
+
+## Main Features
+
+- Generate separate tokens for each candidate in the provided list.
+- Candidates use the token to verify and participate in the interview.
+- Record the candidate’s answering process for each question.
+- Limit the preparation time and the answering time.
+- Store the results after completion with the candidate’s name and the interview start time.
+- Convert the candidate’s speech to text (Only works when the language is English).
+
+## Technologies Used
+
+- Front-end: HTML / CSS / Javascript / JSON
+- Back-end: PHP / FFPRESET, whisper AI
+- Excel file to provide the candidate list. Python to generate tokens.
+
 
 # 2. SYSTEM FEATURES (FULL DETAILS)
+
 ## 2.1 Video Recording Engine
-- Sử dụng MediaRecorder API  
-- Hỗ trợ các codec:
-  - `video/webm;codecs=vp8`
-  - `video/webm;codecs=vp9`
-- Preview camera trực tiếp  
-- Auto fallback khi codec không hỗ trợ  
-- Tự động dừng khi countdown = 0  
-- Lưu video dưới dạng blob, sau đó upload bằng Fetch  
-- Re-encoding compatibility với ffmpeg (server-side)
+
+- Uses MediaRecorder API  
+- Supports codecs:  
+  - `video/webm;codecs=vp8`  
+  - `video/webm;codecs=vp9`  
+- Live camera preview  
+- Auto fallback when codec is not supported  
+- Automatically stops when countdown = 0  
+- Saves video as blob, then uploads via Fetch  
+- Re-encoding compatibility with ffmpeg (server-side)  
 
 ## 2.2 Time Control System
-Mỗi câu hỏi có:
-- **Thời gian trả lời:** ví dụ 10s  
-- **Break time sau câu hỏi:** ví dụ 5s  
-- **3 break tuỳ chỉnh:** 5s – 5s – 3s  
-- Trong break có thể hiển thị:
-  - “Next”
-  - “Start Recording”
-  - Hoặc auto-skip  
-Countdown gồm:
-- Timer hiển thị mm:ss  
+
+Each question has:  
+- **Answer time:** 10s  
+- **Break time after question:**  5s  
+- **One break for preparation:** 3s
+During breaks, it can display:  
+  - “Start Recording”  
+Countdown includes:  
+- Timer display mm:ss  
 - Progress bar  
-- Âm thông báo cuối thời gian (tùy chọn)
 
 ## 2.3 Token Authentication
-- Mỗi ứng viên có token duy nhất  
-- Token kiểm tra:
-  1. Tồn tại  
-  2. Chưa hết hạn  
-  3. Chưa used  
-- Nếu invalid → redirect sang trang lỗi  
-- Token log:
+
+- Each candidate has a unique token  
+- Token checks:  
+  1. Existence  
+  2. Not expired  
+  3. Not used  
+- If invalid → redirect to error page  
+- Token logs:  
   - CPU visited  
   - Browser info  
-  - Device type
+  - Device type  
 
 ## 2.4 Upload & Storage Module
-Upload workflow:
+Upload workflow:  
 1. MediaRecorder → Blob  
 2. Blob → FormData  
 3. Fetch POST → `/api/upload-video`  
-4. Backend lưu file: `/records/<token>/<question>.webm`  
+4. Backend saves file: `/records/<token>/<question>.webm`  
 5. (Optional) ffmpeg remux → mp4  
-6. Gửi webhook/email khi mọi video hoàn tất  
+6. Send webhook/email when all videos are completed  
 
-Upload có:
-- Chunking (tùy chọn)  
-- Retry 3 lần  
-- Tối đa kích thước 300MB/video  
-- Hash checksum SHA-256
+Upload includes:  
+- Maximum size 100MB/video  
+- SHA-256 hash checksum  
 
 ## 2.5 UI/UX
 - Mobile-first  
 - Bootstrap 5  
-- 3 nút chính:
+- 2 main buttons:  
   - Start Recording  
   - Stop Recording  
-  - Next  
-- Màn hình câu hỏi:
+
+- Question screen:  
   - Title  
   - Description  
   - Countdown  
-  - Preview camera  
-- Màn hình break:
-  - Thời gian còn lại  
-  - Hướng dẫn  
-  - Nút skip
+  - Camera preview  
+- Break screen:  
+  - Remaining time  
+  - Instructions  
+  - Skip button
+
 
 # 3. SYSTEM ARCHITECTURE
 ```text
@@ -114,52 +123,69 @@ Upload có:
 # 4. Project structure
 ``` text
 web_phong_van/
-│
 ├── index.html
 ├── style.css
-├── recorder.js
-├── recorder-v3.js
-├── /questions/questions.json
-│
-├── /records/
-│   └── <token>/<question>.webm
-│
-└── server/
-    ├── index.js
-    ├── db.sql
-    ├── config.js
-    ├── utils/
-    └── services/
+├── recorder.js              
+├── recorder-v3.js           
+├── questions/
+│   └── questions.json
+├── records/                
+│   └── /
+│       ├── 1.webm
+│       ├── 2.webm
+│       └── ...
+├── server/
+│   ├── index.js
+│   ├── db.sql
+│   ├── config.js
+│   ├── package.json
+│   ├── .env.example
+│   ├── utils/
+│   └── services/
+├── generate_tokens.py       
+└── README.md
+
 ```
 # 5. INSTALLATION & DEPLOYMENT
 ## 5.1 Clone project
 ``` bash
 git clone https://github.com/nhnminh1409/web_phong_van
 cd web_phong_van
+
+Pip install pandas
 ```
-## 5.2 Node.js dependencies
-``` bash
-npm install
-```
-## 5.3 Environment variables (server/.env)
-``` ini
-PORT=3000
-DATABASE_URL=postgres://user:pass@localhost:5432/interview
-VIDEO_PATH=./records
-WEBHOOK_URL=https://api.company.com/interview-done
+## 5.2 Local Setup (XAMPP – Recommended)
+
+This project is designed to run using a local web server via **XAMPP Apache**.
+
+### Steps:
+``` sql
+1. Install and open **XAMPP Control Panel**  
+2. Start the **Apache** service  
+3. Copy the entire project folder
+4. Get the computer’s local IP address (the machine running XAMPP).
 ```
 
-## 5.4 Start server
-``` bash
-npm start
+You will use this IP to access the interview page from any device on the same network.
+
+---
+
+## 5.3 Token Generator (Python)
+
+Tokens are generated automatically using the **RUN** script.
+
+Run:
+
+```bash
+python RUN.py
+
+```
+## 5.4. How candidates access the system
+After tokens are generated and Apache is running, candidates access the interview by opening:
+```perl
+http://<your-local-ip>/web_phong_van?token=<generated-token>
 ```
 
-## 5.5 Production (Nginx reverse proxy)
-``` nginx
-location / {
-    proxy_pass http://localhost:3000;
-}
-```
 # 6. DATABASE SCHEMA
 ``` sql
 CREATE TABLE tokens (
@@ -196,16 +222,16 @@ CREATE TABLE logs (
 POST /api/check-token
 Request:
 ``` json
-{ "token": "abc123" }
+ "token": "abc123" 
 ```
 
 Response:
 ``` json
-{
+
   "valid": true,
   "candidate": "Nguyen Van A",
   "expires_at": "2025-12-30T10:00:00Z"
-}
+
 ```
 ## 7.2 Upload video
 POST /api/upload-video
@@ -219,10 +245,10 @@ file: <blob>
 
 Response:
 ``` json
-{
-  "status": "success",
-  "video_path": "/records/abc123/1.webm"
-}
+
+"status": "success",
+"video_path": "/records/abc123/1.webm"
+
 ```
 ## 7.3 Mark interview complete
 
@@ -230,7 +256,7 @@ POST /api/complete
 
 Response:
 ``` json
-{ "status": "ok" }
+"status": "ok" 
 ```
 
 ## 8. INTERVIEW FLOW DIAGRAM (ASCII)
@@ -250,7 +276,7 @@ Response:
 [Upload Video]
    │
    ▼
-[Break 1: 5s] → [Break 2: 5s] → [Break 3: 3s]
+[Break 1: 5s] → [Break 2: 3s] 
    │
    ▼
 [Next Question]
@@ -258,55 +284,6 @@ Response:
    ▼
 [Completed] → Send Email/Webhook → [Thank you]
 ```
-# 9. USAGE GUIDE (FULL)
 
-## 9.1 Ứng viên truy cập
-- URL: `https://domain.com/token/abc123`
-- Hệ thống kiểm tra token:
-  - Nếu hợp lệ → vào trang intro
-  - Nếu không → báo lỗi
 
-## 9.2 Màn hình câu hỏi
-- Hiển thị câu hỏi số X
-- Nút **Start Recording**
-- Hướng dẫn:
-  - Giữ mắt nhìn camera
-  - Nói rõ ràng
-  - Không rời khung hình
 
-## 9.3 Ghi hình
-- Khi bấm **Start**:
-  - Camera bật
-  - Countdown chạy
-  - Tự động stop khi hết giờ
-
-## 9.4 Upload video
-- Video upload ngay sau khi stop
-- Nếu fail:
-  - Retry 3 lần
-  - Fail toàn bộ → báo lỗi
-
-## 9.5 Break
-- 5s → nút **Next**
-- 5s → nút **Start Recording**
-- 3s → tự động qua câu
-
-## 9.6 Hoàn thành
-- Gửi webhook → HR
-- Hiển thị thông báo:
-> “Bạn đã hoàn thành buổi phỏng vấn!”
-
----
-
-# 10. SECURITY BEST PRACTICES
-- Token ≥ 32 ký tự
-- Token hết hạn 24–72h
-- Không lưu video trong `/public`
-- Sử dụng HTTPS
-- Chặn CORS từ domain lạ
-- Giới hạn file:
-  - Max 300MB
-  - Chỉ `webm`
-- Upload cần:
-  - Xác thực token
-  - Kiểm tra `question_id` hợp lệ
