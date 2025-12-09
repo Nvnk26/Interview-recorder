@@ -122,28 +122,33 @@ Upload includes:
 ```
 # 4. Project structure
 ``` text
-web_phong_van/
-├── index.html
-├── style.css
-├── recorder.js              
-├── recorder-v3.js           
-├── questions/
-│   └── questions.json
-├── records/                
-│   └── /
-│       ├── 1.webm
-│       ├── 2.webm
-│       └── ...
-├── server/
-│   ├── index.js
-│   ├── db.sql
-│   ├── config.js
-│   ├── package.json
-│   ├── .env.example
-│   ├── utils/
-│   └── services/
-├── generate_tokens.py       
-└── README.md
+webphongvan/
+├── interview-recorder/
+│   ├── api/                  
+│   ├── assets/               
+│   ├── Candidates_YYYY-MM-DD/
+│   ├── ffmpeg/               
+│   ├── js/                   
+│   ├── uploads/              
+│   ├── whisper/              
+│   │
+│   ├── admin.html            
+│   ├── index.html            
+│   ├── interview.html        
+│   ├── token.html            
+│   │
+│   ├── contact-messages.txt  
+│   ├── generate_tokens.py    
+│   ├── icon.png              
+│   ├── icon1.png             
+│   ├── interviewee.xlsx      
+│   ├── questions.json        
+│   ├── tokens.json           
+│   ├── RUN.bat               
+│
+├── .gitattributes            
+└── README.md                 
+
 
 ```
 # 5. INSTALLATION & DEPLOYMENT
