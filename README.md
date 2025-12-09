@@ -138,50 +138,13 @@ webphongvan/
 │   │   ├── interviewee.tokens        
 │   │   └── tokens_backup.json        
 │   │
-│   ├── ffmpeg/               
-│   │   ├── bin/
-│   │   │   ├── ffmpeg              
-│   │   │   ├── ffplay              
-│   │   │   └── ffprobe             
-│   │   ├── doc/
-│   │   │   ├── bootstrap.min        
-│   │   │   ├── community/           
-│   │   │   ├── default/             
-│   │   │   ├── developer/           
-│   │   │   ├── fate/                
-│   │   │   ├── ffmpeg-all           
-│   │   │   ├── libavcodec/          
-│   │   │   ├── libavfilter/         
-│   │   │   ├── libavformat/         
-│   │   │   └── platform/            
-│   │   ├── presets/                     
-│   │   │   ├── libvpx-360p.ffpreset     
-│   │   │   ├── libvpx-720p.ffpreset     
-│   │   │   ├── libvpx-1080p.ffpreset    
-│   │   │   ├── libvpx-50.60.ffpreset      
-│   │   │   └── libvpx-1080-50-60.ffpreset 
+│   ├── ffmpeg/                
 │   │
 │   ├── js/                   
 │   │   ├── recorder.js          
 │   │   └── recorder-v3.js      
 │   ├── uploads/              
-│   ├── whisper/              
-│   │   ├── models/            
-│   │   │   ├── ggml.dll                     
-│   │   │   ├── ggml-base.dll                  
-│   │   │   ├── ggml-cpu.dll                  
-│   │   │   ├── lsp/                      
-│   │   │   ├── quantize/                 
-│   │   │   ├── SDL2.dll                   
-│   │   │   ├── test-vad-full/            
-│   │   │   ├── test-vad/                 
-│   │   │   ├── vad-speech-segments/       
-│   │   │   ├── wchess/                   
-│   │   │   ├── whisper-bench/            
-│   │   │   ├── whisper-cli/              
-│   │   │   ├── whisper-command/           
-│   │   │   ├── whisper-stream/            
-│   │   │   └── whisper-talk-llama/        
+│   ├── whisper/                  
 │   │
 │   ├── admin.html            
 │   ├── index.html            
