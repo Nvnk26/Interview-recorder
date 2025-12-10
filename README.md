@@ -249,7 +249,7 @@ Response:
 
   "valid": true,
   "candidate": "Nguyen Van A",
-  "expires_at": "2025-12-30T10:00:00Z"
+ 
 
 ```
 ## 7.2 Upload video
