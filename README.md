@@ -450,30 +450,62 @@ Response:
 ```
 
 ## 8. INTERVIEW FLOW DIAGRAM (ASCII)
-``` text
-[Start] 
-   │
-   ▼
-[Token Login]──invalid──▶[Error Page]
-   │valid
-   ▼
-[Show Question 1]
-   │ Start Recording
-   ▼
-[Countdown Running]
-   │ timeout or stop
-   ▼
-[Upload Video]
-   │
-   ▼
-[Break 1: 5s] → [Break 2: 3s] 
-   │
-   ▼
-[Next Question]
-   │
-   ▼
-[Completed] → Send Email/Webhook → [Thank you]
+``` mermaid
+flowchart TD
+    A[Start: index.html - Home Page] 
+    B[Click 'Start Interview' → token.html]
+    C[Enter Access Token]
+    D{Backend: verify-token.php}
+    E[Admin Dashboard - admin.html]
+    F[Confirm Name → interview.html]
+    G[Error: Invalid or Used Token]
+    H[Load questions.json]
+    I[createSession → Create folder in /uploads/]
+    J[Countdown 10s → Start Recording]
+    K[Record up to 60s → Upload Qx.webm]
+    L[Transcribe → FFmpeg + Whisper → transcript.txt]
+    M{More questions?}
+    N[finishSession → Mark as completed]
+    O[Thank You + Token locked]
+    P[Admin: View session list]
+    Q[Click session → View videos + transcript]
+
+    A --> B --> C --> D
+    D -->|Admin| E
+    D -->|Candidate OK| F
+    D -->|Invalid/Used| G
+    F --> H --> I --> J --> K --> L --> M
+    M -->|Yes| J
+    M -->|No| N --> O
+    E --> P --> Q
+    G --> C
+    Q --> E
+
+    classDef startEnd fill:#4CAF50, color:white, stroke:#388E3C
+    classDef input fill:#2196F3, color:white, stroke:#1976D2
+    classDef process fill:#FF9800, color:white, stroke:#F57C00
+    classDef decision fill:#F44336, color:white, stroke:#D32F2F
+    classDef admin fill:#9C27B0, color:white, stroke:#7B1FA2
+    classDef error fill:#F44336, color:white, stroke:#D32F2F
+    classDef success fill:#8BC34A, color:white, stroke:#689F38
+
+    class A,O startEnd
+    class B,C input
+    class H,I,J,K,L,N,P,Q process
+    class D,M decision
+    class E admin
+    class G error
 ```
+Note:
 
+Green: Start & End
 
+Blue: User actions (token input)
 
+Orange: Processing steps (recording, upload, transcribe…)
+
+Gray: Decision points & loops 
+
+Deep purple: Admin area
+
+Red: Error state
