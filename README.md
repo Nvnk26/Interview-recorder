@@ -1,11 +1,30 @@
 
 # INTERVIEWING WEB
-# 1. Overview
+# Overview
 
 `web_phong_van` is a website used to provide interviewers with an online interview method and to store interview results.
 This project aims to make the interviewing process easier. Candidates can participate in multinational interviews without needing to travel for an in-person interview. For employers, the website helps them save time and manpower during the recruitment process; in addition, the website allows employers to store the interview results of candidates.
+# 1. Main Project Structure
+## 1.1 Main Project Structure (From Repository)
 
-## Main Features
+Root Level:
+index.html (homepage), token.html (token verification), interview.html (interview page), admin.html (admin dashboard), questions.json (list of questions).
+
+/js/:
+recorder-v3.js (recording logic, timer, upload), recorder.js (old version).
+
+/Backend/api/:
+PHP API files including:
+verify-token.php, session-start.php, upload-one.php, transcribe.php,
+session-finish.php, admin-api.php, contact.php.
+
+/data/:
+tokens.json, used_tokens.json, questions.json (backup),
+contact-messages.txt, interviewee.xlsx.
+
+/utils/:
+`generate_tokens
+## 1.2 Main Features
 
 - Generate separate tokens for each candidate in the provided list.
 - Candidates use the token to verify and participate in the interview.
@@ -14,13 +33,162 @@ This project aims to make the interviewing process easier. Candidates can partic
 - Store the results after completion with the candidate’s name and the interview start time.
 - Convert the candidate’s speech to text (Only works when the language is English).
 
-## Technologies Used
+## 1.3 Technologies Used
 
 - Front-end: HTML / CSS / Javascript / JSON
 - Back-end: PHP / FFPRESET, whisper AI
 - Excel file to provide the candidate list. Python to generate tokens.
 
+## 1.4 Overall Workflow
+The project has two main flows: Candidate and Admin.
+It follows a client–server model: frontend calls backend APIs via fetch, backend stores data in lightweight JSON/txt files.
 
+### Candidate Flow
+- Step 1 — Home Page (index.html)
+
+Show introduction + contact form.
+
+User clicks Start Interview → goes to token.html.
+
+- Step 2 — Token Verification (token.html)
+
+User enters token
+
+Frontend sends:
+
+POST → Backend/api/verify-token.php
+
+
+Backend checks tokens.json:
+
+If admin token → redirect to admin.html
+
+If candidate token:
+
+validate one-time rule via used_tokens.json
+
+if valid → show candidate name
+
+User clicks “That’s me”
+→ save token & username to sessionStorage
+→ redirect to interview.html
+
+### Interview Flow (interview.html + js/recorder-v3.js)
+1. Load Questions
+
+Fetched from questions.json.
+
+2. Create Session
+
+Call:
+
+Backend/api/session-start.php
+
+
+Backend creates a folder in /uploads/ containing meta.json.
+
+3. Interview Logic
+
+10-second preparation countdown
+
+Recording
+
+MediaRecorder (video + audio)
+
+Max 60 seconds
+
+Live timer
+
+Upload video
+
+upload-one.php saves file as Q1.webm, Q2.webm, …
+
+meta.json is updated
+
+Transcription
+
+transcribe.php
+→ FFmpeg extract audio
+→ Whisper
+→ save transcript.txt
+
+Repeat for 5 questions
+
+4. Finish Session
+
+Call session-finish.php
+
+Backend updates meta.json → status: completed
+
+5. Final Screen
+
+Show Thank you
+
+Token is marked as used in used_tokens.json.
+
+### Admin Flow
+Admin Access (admin.html)
+
+Only from admin token.
+
+Main Actions
+
+List sessions
+
+admin-api.php?action=list
+
+
+Reads all folders in /uploads/, loads meta.json.
+
+View session details
+
+admin-api.php?action=view&folder=...
+
+
+Shows:
+
+Videos (Q1–Q5)
+
+Transcript
+
+Metadata
+
+Dashboard:
+
+Auto refresh every 5 seconds
+
+Modal video preview
+
+### Support Flows
+Generate Tokens
+
+Run:
+
+utils/generate_tokens.py
+
+
+Reads interviewee.xlsx
+
+Auto-generate tokens → update tokens.json.
+
+Contact Form
+
+index.html → contact.php
+
+Saved to:
+data/contact-messages.txt
+
+One-Time Token Logic
+
+After a candidate session starts:
+
+token is stored in used_tokens.json
+
+admin tokens bypass this rule
+
+generate_tokens.py
+
+Included script for automatically generating tokens from Excel lists.
 # 2. SYSTEM FEATURES (FULL DETAILS)
 
 ## 2.1 Video Recording Engine
@@ -61,6 +229,7 @@ Countdown includes:
   - Device type  
 
 ## 2.4 Upload & Storage Module
+
 Upload workflow:  
 1. MediaRecorder → Blob  
 2. Blob → FormData  
@@ -74,6 +243,7 @@ Upload includes:
 - SHA-256 hash checksum  
 
 ## 2.5 UI/UX
+
 - Mobile-first  
 - Bootstrap 5  
 - 2 main buttons:  
@@ -90,6 +260,12 @@ Upload includes:
   - Instructions  
   - Skip button
 
+## 2.6 Security & Basic Anti-Cheating (Tier 2+)
+- Token can be used only once → after session-start, mark used: true
+- Each IP can enter a wrong token only 5 times → block for 15 minutes
+- Disable right-click, Ctrl+C, Ctrl+V on the interview page
+- Detect tab switching → pause recording + show warning
+- Video must have a face occupying >40% of the frame (simple detection using face-api.js – bonus feature)
 
 # 3. SYSTEM ARCHITECTURE
 ```text
@@ -97,27 +273,22 @@ Upload includes:
 │      Browser       │
 │  (Frontend + JS)   │
 └───────┬───────────┘
-        │ MediaRecorder
+        │  MediaRecorder → upload video chunks
         ▼
 ┌───────────────────┐
 │     Upload API     │
-│  /api/upload-video │
+│   (/api/upload)    │
 └───────┬───────────┘
-        │ Save video
+        │  Save files
         ▼
 ┌───────────────────┐
 │    File Storage    │
-│ /records/<token>/  │
+│   (/uploads/)      │
 └───────┬───────────┘
-        │ Log DB
+        │  Notify HR
         ▼
 ┌───────────────────┐
-│  PostgreSQL DB     │
-└───────┬───────────┘
-        │ Notify
-        ▼
-┌───────────────────┐
-│ Webhook / Email HR │
+│  Webhook / Email   │
 └───────────────────┘
 ```
 # 4. Project structure
