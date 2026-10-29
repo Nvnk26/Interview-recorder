@@ -1,0 +1,51 @@
+# DÁN TOÀN BỘ Ô NÀY VÀO MỘT CELL MỚI Ở CUỐI NOTEBOOK SAU KHI CELL 27 CHẠY THÀNH CÔNG.
+# Cell này xuất Logistic Regression cùng toàn bộ bước tiền xử lý mà app.py cần.
+
+from pathlib import Path
+import joblib
+import sklearn
+import pandas as pd
+import numpy as np
+
+# Lấy riêng mô hình Logistic Regression đã huấn luyện trong notebook.
+# Ngưỡng được chọn theo quy tắc Recall >= 0.80 trên tập Validation.
+lr_model = models["Logistic Regression"]
+lr_recall, lr_precision, lr_idx, lr_reached_target = sweeps["Logistic Regression"]
+lr_threshold = float(thresholds[lr_idx])
+
+model_bundle = {
+    "model": lr_model,
+    "threshold": lr_threshold,
+    "cleaner": cleaner,
+    "preprocessor": preprocessor,
+    "selected_features": list(selected_features),
+    "scale_cols": list(scale_cols),
+    "binary_cols": list(binary_cols),
+    "feature_cols": list(X.columns),
+    "validation_recall_at_threshold": float(lr_recall[lr_idx]),
+    "validation_precision_at_threshold": float(lr_precision[lr_idx]),
+    "validation_recall_target_reached": bool(lr_reached_target),
+    "library_versions": {
+        "python_note": "Use a Python environment compatible with the installed scikit-learn version.",
+        "scikit_learn": sklearn.__version__,
+        "pandas": pd.__version__,
+        "numpy": np.__version__,
+        "joblib": joblib.__version__,
+    },
+}
+
+output_path = Path("diabetes_model_bundle.joblib")
+joblib.dump(model_bundle, output_path)
+
+print(f"Đã lưu mô hình: {output_path.resolve()}")
+print(f"Ngưỡng phân loại Logistic Regression: {lr_threshold:.2f}")
+print(f"Recall Validation tại ngưỡng này: {lr_recall[lr_idx]:.4f}")
+print(f"Precision Validation tại ngưỡng này: {lr_precision[lr_idx]:.4f}")
+print("Phiên bản thư viện:", model_bundle["library_versions"])
+
+# Nếu chạy trên Google Colab, mở hộp thoại tải tệp về máy.
+try:
+    from google.colab import files
+    files.download(str(output_path))
+except ImportError:
+    print("Tệp đã nằm trong thư mục làm việc hiện tại. Hãy chép nó vào cùng thư mục với app.py.")

@@ -1,511 +1,58 @@
+# Streamlit demo: dự đoán nhóm tiểu đường
 
-# INTERVIEWING WEB
-# Overview
+Ứng dụng nhập thông tin qua 3 chặng, tự tính BMI từ chiều cao/cân nặng và xuất nhãn `0` hoặc `1` bằng mô hình đã huấn luyện trong notebook.
 
-`web_phong_van` is a website used to provide interviewers with an online interview method and to store interview results.
-This project aims to make the interviewing process easier. Candidates can participate in multinational interviews without needing to travel for an in-person interview. For employers, the website helps them save time and manpower during the recruitment process; in addition, the website allows employers to store the interview results of candidates.
-# 1. Main Project Structure
-## 1.1 Main Project Structure (From Repository)
+## 1. Xuất mô hình từ notebook
 
-Root Level:
-index.html (homepage), token.html (token verification), interview.html (interview page), admin.html (admin dashboard), questions.json (list of questions).
+**Cách khuyến nghị:** dùng file `Diabete_final_streamlit_ready.ipynb` có trong gói này. Đây là bản sao của notebook gốc đã được chuẩn bị để chạy từ đầu: ô cài đặt đặt trước ô import `kagglehub`, bổ sung các import `precision_score` và `roc_auc_score` còn thiếu, xóa output cũ và thêm ô xuất mô hình ở cuối. File `Diabete_final.ipynb` gốc của bạn không bị thay đổi.
 
-/js/:
-recorder-v3.js (recording logic, timer, upload), recorder.js (old version).
+1. Tải `Diabete_final_streamlit_ready.ipynb` lên Google Colab hoặc mở bằng môi trường Jupyter.
+2. Chạy toàn bộ notebook từ đầu đến cuối theo thứ tự. Ô cuối cùng sẽ lưu Logistic Regression, ngưỡng phân loại và các bước tiền xử lý cần thiết cho ứng dụng.
+3. Nếu chạy trên Google Colab, ô xuất sẽ tự gọi tải `diabetes_model_bundle.joblib` xuống máy. Nếu chạy Jupyter cục bộ, tìm tệp này trong thư mục làm việc của notebook.
+4. Đặt `diabetes_model_bundle.joblib` vào cùng thư mục với `app.py`.
 
-/Backend/api/:
-PHP API files including:
-verify-token.php, session-start.php, upload-one.php, transcribe.php,
-session-finish.php, admin-api.php, contact.php.
+Nếu bạn tiếp tục dùng file notebook gốc, hãy bổ sung `precision_score` vào import ở ô 26, bổ sung `roc_auc_score` vào import ở ô 27, cài `kagglehub` trước khi import nó ở ô 4, rồi sao chép nội dung `export_model_cell.txt` vào một ô code mới ở cuối notebook.
 
-/data/:
-tokens.json, used_tokens.json, questions.json (backup),
-contact-messages.txt, interviewee.xlsx.
+Tệp mô hình lưu lại Logistic Regression, ngưỡng đã chọn từ tập Validation, bộ làm sạch, bộ chuẩn hóa và các đặc trưng đã chọn. Không huấn luyện lại mô hình trong ứng dụng.
 
-/utils/:
-`generate_tokens
-## 1.2 Main Features
+## 2. Cài đặt trên Windows
 
-- Generate separate tokens for each candidate in the provided list.
-- Candidates use the token to verify and participate in the interview.
-- Record the candidate’s answering process for each question.
-- Limit the preparation time and the answering time.
-- Store the results after completion with the candidate’s name and the interview start time.
-- Convert the candidate’s speech to text (Only works when the language is English).
+Cài Python từ trang chủ Python nếu máy chưa có. Khi cài, bật tùy chọn thêm Python vào PATH nếu trình cài đặt có hiển thị tùy chọn đó.
 
-## 1.3 Technologies Used
+Mở Command Prompt (CMD), dùng `cd` để chuyển vào thư mục chứa `app.py`, sau đó chạy lần lượt:
 
-- Front-end: HTML / CSS / Javascript / JSON
-- Back-end: PHP / FFPRESET, whisper AI
-- Excel file to provide the candidate list. Python to generate tokens.
+```bat
+py -m venv .venv
+.venv\Scripts\activate
+python -m pip install --upgrade pip
+pip install -r requirements.txt
+```
 
-## 1.4 Overall Workflow
-The project has two main flows: Candidate and Admin.
-It follows a client–server model: frontend calls backend APIs via fetch, backend stores data in lightweight JSON/txt files.
+Chạy ứng dụng:
 
-### Candidate Flow
-- Step 1 — Home Page (index.html)
+```bat
+python -m streamlit run app.py
+```
 
-  - Show introduction + contact form.
+Streamlit sẽ in địa chỉ cục bộ, thường là `http://localhost:8501`. Giữ cửa sổ CMD mở khi sử dụng ứng dụng.
 
-  - User clicks Start Interview → goes to token.html.
+Nếu lệnh `py` không hoạt động, thử thay `py` bằng `python`. Nếu gặp lỗi khi tải mô hình do không tương thích phiên bản scikit-learn, xem phần `library_versions` được in ra khi chạy ô xuất mô hình và cài đúng phiên bản `scikit-learn` được ghi ở đó rồi chạy lại ứng dụng.
 
-- Step 2 — Token Verification (token.html)
+## 3. Cấu trúc thư mục
 
-  - User enters token
-
-    Frontend sends:
-
-    POST → Backend/api/verify-token.php
-
-
-  - Backend checks tokens.json:
-
-If admin token → redirect to admin.html
-
-If candidate token:
-
-validate one-time rule via used_tokens.json
-
-if valid → show candidate name
-
-User clicks “That’s me”
-→ save token & username to sessionStorage
-→ redirect to interview.html
-
-### Interview Flow (interview.html + js/recorder-v3.js)
-1. Load Questions
-
-- Fetched from questions.json.
-
-2. Create Session
-
-- Call:
-
-  - Backend/api/session-start.php
-
-
-  - Backend creates a folder in /uploads/ containing meta.json.
-
-3. Interview Logic
-
-- 10-second preparation countdown
-
-- Recording
-
-- MediaRecorder (video + audio)
-
-- Max 60 seconds
-
-- Live timer
-
-- Upload video
-
-- upload-one.php saves file as Q1.webm, Q2.webm, …
-
-- meta.json is updated
-
-Transcription
-
-transcribe.php
-→ FFmpeg extract audio
-→ Whisper
-→ save transcript.txt
-
-Repeat for 5 questions
-
-4. Finish Session
-
-- Call session-finish.php
-
-- Backend updates meta.json → status: completed
-
-5. Final Screen
-
-- Show Thank you
-
-- Token is marked as used in used_tokens.json.
-
-### Admin Flow
-Admin Access (admin.html)
-
-Only from admin token.
-
-Main Actions
-
-List sessions
-
-admin-api.php?action=list
-
-
-Reads all folders in /uploads/, loads meta.json.
-
-View session details
-
-admin-api.php?action=view&folder=...
-
-
-Shows:
-
-Videos (Q1–Q5)
-
-Transcript
-
-Metadata
-
-Dashboard:
-
-Auto refresh every 5 seconds
-
-Modal video preview
-
-### Support Flows
-Generate Tokens
-
-Run:
-
-utils/generate_tokens.py
-
-
-Reads interviewee.xlsx
-
-Auto-generate tokens → update tokens.json.
-
-Contact Form
-
-index.html → contact.php
-
-Saved to:
-data/contact-messages.txt
-
-One-Time Token Logic
-
-After a candidate session starts:
-
-token is stored in used_tokens.json
-
-admin tokens bypass this rule
-
-generate_tokens.py
-
-Included script for automatically generating tokens from Excel lists.
-# 2. SYSTEM FEATURES (FULL DETAILS)
-
-## 2.1 Video Recording Engine
-
-- Uses MediaRecorder API  
-- Supports codecs:  
-  - `video/webm;codecs=vp8`  
-  - `video/webm;codecs=vp9`  
-- Live camera preview  
-- Auto fallback when codec is not supported  
-- Automatically stops when countdown = 0  
-- Saves video as blob, then uploads via Fetch  
-- Re-encoding compatibility with ffmpeg (server-side)  
-
-## 2.2 Time Control System
-
-Each question has:  
-- **Answer time:** 10s  
-- **Break time after question:**  5s  
-- **One break for preparation:** 3s
-During breaks, it can display:  
-  - “Start Recording”  
-Countdown includes:  
-- Timer display mm:ss  
-- Progress bar  
-
-## 2.3 Token Authentication
-
-- Each candidate has a unique token  
-- Token checks:  
-  1. Existence  
-  2. Not expired  
-  3. Not used  
-- If invalid → redirect to error page  
-- Token logs:  
-  - CPU visited  
-  - Browser info  
-  - Device type  
-
-## 2.4 Upload & Storage Module
-
-Upload workflow:  
-1. MediaRecorder → Blob  
-2. Blob → FormData  
-3. Fetch POST → `/api/upload-video`  
-4. Backend saves file: `/records/<token>/<question>.webm`  
-5. (Optional) ffmpeg remux → mp4  
-6. Send webhook/email when all videos are completed  
-
-Upload includes:  
-- Maximum size 100MB/video  
-- SHA-256 hash checksum  
-
-## 2.5 UI/UX
-
-- Mobile-first  
-- Bootstrap 5  
-- 2 main buttons:  
-  - Start Recording  
-  - Stop Recording  
-
-- Question screen:  
-  - Title  
-  - Description  
-  - Countdown  
-  - Camera preview  
-- Break screen:  
-  - Remaining time  
-  - Instructions  
-  - Skip button
-
-## 2.6 Security & Basic Anti-Cheating (Tier 2+)
-- Token can be used only once → after session-start, mark used: true
-- Each IP can enter a wrong token only 5 times → block for 15 minutes
-- Disable right-click, Ctrl+C, Ctrl+V on the interview page
-- Detect tab switching → pause recording + show warning
-- Video must have a face occupying >40% of the frame (simple detection using face-api.js – bonus feature)
-
-# 3. SYSTEM ARCHITECTURE
 ```text
-┌───────────────────┐
-│      Browser       │
-│  (Frontend + JS)   │
-└───────┬───────────┘
-        │  MediaRecorder → upload video chunks
-        ▼
-┌───────────────────┐
-│     Upload API     │
-│   (/api/upload)    │
-└───────┬───────────┘
-        │  Save files
-        ▼
-┌───────────────────┐
-│    File Storage    │
-│   (/uploads/)      │
-└───────┬───────────┘
-        │  Notify HR
-        ▼
-┌───────────────────┐
-│  Webhook / Email   │
-└───────────────────┘
-```
-# 4. Project structure
-``` text
-webphongvan/
-├── interview-recorder/
-│   ├── api/                  
-│   │   ├── admin-api.php                
-│   │   ├── contact.php                  
-│   │   ├── session-finish.php           
-│   │   ├── session-start.php            
-│   │   ├── transcribe.php               
-│   │   ├── upload-one.php               
-│   │   └── verify-token.php             
-│   │
-│   ├── assets/               
-│   ├── Candidates_YYYY-MM-DD/
-│   │   ├── interviewee.tokens        
-│   │   └── tokens_backup.json        
-│   │
-│   ├── ffmpeg/                
-│   │
-│   ├── js/                   
-│   │   ├── recorder.js          
-│   │   └── recorder-v3.js      
-│   ├── uploads/              
-│   ├── whisper/                  
-│   │
-│   ├── admin.html            
-│   ├── index.html            
-│   ├── interview.html        
-│   ├── token.html            
-│   │
-│   ├── contact-messages.txt  
-│   ├── generate_tokens.py    
-│   ├── icon.png              
-│   ├── icon1.png             
-│   ├── interviewee.xlsx      
-│   ├── questions.json        
-│   ├── tokens.json           
-│   └── RUN.bat               
-│
-├── .gitattributes            
-└── README.md            
-
-
-```
-# 5. INSTALLATION & DEPLOYMENT
-## 5.1 Clone project
-``` bash
-git clone https://github.com/nhnminh1409/web_phong_van
-cd web_phong_van
-
-Pip install pandas
-```
-## 5.2 Local Setup (XAMPP – Recommended)
-
-This project is designed to run using a local web server via **XAMPP Apache**.
-
-### Steps:
-``` sql
-1. Install and open **XAMPP Control Panel**  
-2. Start the **Apache** service  
-3. Copy the entire project folder
-4. Get the computer’s local IP address (the machine running XAMPP).
+diabetes_streamlit_demo/
+├── app.py
+├── requirements.txt
+├── export_model_cell.txt
+├── Diabete_final_streamlit_ready.ipynb
+├── README.md
+└── diabetes_model_bundle.joblib   # chép vào sau khi xuất từ notebook
 ```
 
-You will use this IP to access the interview page from any device on the same network.
+## Lưu ý về dữ liệu và sức khỏe
 
----
-
-## 5.3 Token Generator (Python)
-
-Tokens are generated automatically using the **RUN** script.
-
-Run:
-
-```bash
-python RUN.py
-
-```
-## 5.4. How candidates access the system
-After tokens are generated and Apache is running, candidates access the interview by opening:
-```perl
-http://<your-local-ip>/web_phong_van?token=<generated-token>
-```
-
-# 6. DATABASE SCHEMA
-``` sql
-CREATE TABLE tokens (
-    id SERIAL PRIMARY KEY,
-    token VARCHAR(64) UNIQUE NOT NULL,
-    candidate_name VARCHAR(255),
-    email VARCHAR(255),
-    expires_at TIMESTAMP,
-    used BOOLEAN DEFAULT FALSE,
-    created_at TIMESTAMP DEFAULT NOW()
-);
-
-CREATE TABLE interview_results (
-    id SERIAL PRIMARY KEY,
-    token VARCHAR(64) REFERENCES tokens(token),
-    question_number INTEGER NOT NULL,
-    video_path TEXT NOT NULL,
-    duration INTEGER,
-    filesize BIGINT,
-    created_at TIMESTAMP DEFAULT NOW()
-);
-
-CREATE TABLE logs (
-    id SERIAL PRIMARY KEY,
-    token VARCHAR(64),
-    event TEXT,
-    metadata JSON,
-    created_at TIMESTAMP DEFAULT NOW()
-);
-```
-
-# 7. API DOCUMENTATION (FULL)
-## 7.1 Check token
-POST /api/check-token
-Request:
-``` json
- "token": "abc123" 
-```
-
-Response:
-``` json
-
-  "valid": true,
-  "candidate": "Nguyen Van A",
- 
-
-```
-## 7.2 Upload video
-POST /api/upload-video
-
-FormData:
-``` makefile
-token: abc123
-question: 1
-file: <blob>
-```
-
-Response:
-``` json
-
-"status": "success",
-"video_path": "/records/abc123/1.webm"
-
-```
-## 7.3 Mark interview complete
-
-POST /api/complete
-
-Response:
-``` json
-"status": "ok" 
-```
-
-## 8. INTERVIEW FLOW DIAGRAM (ASCII)
-``` mermaid
-flowchart TD
-    A[Start: index.html - Home Page] 
-    B[Click 'Start Interview' → token.html]
-    C[Enter Access Token]
-    D{Backend: verify-token.php}
-    E[Admin Dashboard - admin.html]
-    F[Confirm Name → interview.html]
-    G[Error: Invalid or Used Token]
-    H[Load questions.json]
-    I[createSession → Create folder in /uploads/]
-    J[Countdown 10s → Start Recording]
-    K[Record up to 60s → Upload Qx.webm]
-    L[Transcribe → FFmpeg + Whisper → transcript.txt]
-    M{More questions?}
-    N[finishSession → Mark as completed]
-    O[Thank You + Token locked]
-    P[Admin: View session list]
-    Q[Click session → View videos + transcript]
-
-    A --> B --> C --> D
-    D -->|Admin| E
-    D -->|Candidate OK| F
-    D -->|Invalid/Used| G
-    F --> H --> I --> J --> K --> L --> M
-    M -->|Yes| J
-    M -->|No| N --> O
-    E --> P --> Q
-    G --> C
-    Q --> E
-
-    classDef startEnd fill:#4CAF50, color:white, stroke:#388E3C
-    classDef input fill:#2196F3, color:white, stroke:#1976D2
-    classDef process fill:#FF9800, color:white, stroke:#F57C00
-    classDef decision fill:#F44336, color:white, stroke:#D32F2F
-    classDef admin fill:#9C27B0, color:white, stroke:#7B1FA2
-    classDef error fill:#F44336, color:white, stroke:#D32F2F
-    classDef success fill:#8BC34A, color:white, stroke:#689F38
-
-    class A,O startEnd
-    class B,C input
-    class H,I,J,K,L,N,P,Q process
-    class D,M decision
-    class E admin
-    class G error
-```
-Note:
-
-Green: Start & End
-
-Blue: User actions (token input)
-
-Orange: Processing steps (recording, upload, transcribe…)
-
-Gray: Decision points & loops 
-
-Deep purple: Admin area
-
-Red: Error state
+- Nhãn `0` là nhóm không được gắn nhãn tiền tiểu đường/tiểu đường trong bộ dữ liệu; nhãn `1` gộp tiền tiểu đường hoặc tiểu đường.
+- Các khoảng tuổi, học vấn và thu nhập được mã hóa theo bộ dữ liệu khảo sát BRFSS 2015. Các khoảng thu nhập được giữ theo USD của bộ dữ liệu gốc.
+- Bộ dữ liệu là khảo sát người trưởng thành tại Hoa Kỳ năm 2015. Kết quả không nhất thiết khái quát được cho người dùng tại Việt Nam.
+- Điểm do mô hình trả về không phải xác suất lâm sàng đã được hiệu chuẩn, và demo không dùng để chẩn đoán hoặc thay thế lời khuyên y tế.
